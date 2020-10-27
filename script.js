@@ -32,7 +32,19 @@ function startGame() {
 }
 
 function turnClick(square) {
-	turn(square.target.id, huPlayer)
+    //posso cliccare su una casella solo se non è già cliccata
+    //quando clicco il contenuto della cella non è più un numero ma un simbolo
+    if (typeof origBoard[square.target.id] == "number") {
+       turn(square.target.id, huPlayer)
+    /*dopo che ho fatto la mossa verifico se il pc 
+    può fare una mossa cioè se non tutte le celle sono piene 
+    e se non c'è un pareggio
+    */
+   if (!checkTie()) {
+       turn(bestSpot(),aiPlayer)
+   } 
+    }
+    
 }
 
 function turn(squareId, player) {
@@ -96,5 +108,36 @@ function gameOver(gameWon) {
     //nessuna cella
 	for (var i = 0; i < cells.length; i++) {
 		cells[i].removeEventListener('click', turnClick, false);
+    }
+    declareWinner(gameWon.player == huPlayer ? "You win!" : "You lose.");
+}
+
+//cerchiamo la migliore posizione 
+function declareWinner(who) {
+	document.querySelector(".endgame").style.display = "block";
+	document.querySelector(".endgame .text").innerText = who;
+}
+
+//creo un array contenente tutti i quadrati vuoti
+//per farlo filtro semplicemente tutti i quadrati che non contengono numeri
+function emptySquares() {
+	return origBoard.filter(s => typeof s == 'number');
+}
+
+//prendo solamente il primo elemento dell'array contenente le posizioni vuote
+function bestSpot() {
+	return emptySquares()[0];
+}
+//controllo se c'è un pareggio
+function checkTie() {
+    //se non ci sono celle vuote
+	if (emptySquares().length == 0) {
+		for (var i = 0; i < cells.length; i++) {
+			cells[i].style.backgroundColor = "green";
+			cells[i].removeEventListener('click', turnClick, false);
+		}
+		declareWinner("Tie Game!")
+		return true;
 	}
+	return false;
 }
